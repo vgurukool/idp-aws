@@ -27,7 +27,7 @@ keycloak:
     type: "manifests"
 
 backstage:
-  enabled: true
+  enabled: false
   additionalResources:
   - path: true
     manifestPath: "manifests"
@@ -37,7 +37,7 @@ backstage:
     type: "manifests"
 
 argo-workflows:
-  enabled: true
+  enabled: false
   additionalResources:
   - path: true
     manifestPath: "manifests"
