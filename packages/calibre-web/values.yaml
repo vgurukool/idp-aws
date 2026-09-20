@@ -46,7 +46,7 @@ sso:
     clientId: "calibre-web"
     clientSecret: "granth-keycloak-sso-secret-2026"
   cookie:
-    secret: "Z3JhbnRoLXNlY3JldC1jb29raWUtMjAyNg==" # base64 encoded random seed
+    secret: "e8253e754b99c5a50a768cb20d7ebc73" # 32-byte secret for AES-256 cipher
     domain: ".vgurukool.com"
 
 persistence:

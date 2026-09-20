@@ -218,6 +218,35 @@ data:
         "https://${ARGO_WORKFLOW_URL}"
       ]
     }
+  calibre-web-client-payload.json: |
+    {
+      "protocol": "openid-connect",
+      "clientId": "calibre-web",
+      "name": "Granth Calibre-Web Client",
+      "description": "Used for Granth Sovereign Digital Library Calibre-Web SSO",
+      "publicClient": false,
+      "secret": "granth-keycloak-sso-secret-2026",
+      "authorizationServicesEnabled": false,
+      "serviceAccountsEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "frontchannelLogout": true,
+      "attributes": {
+        "saml_idp_initiated_sso_url_name": "",
+        "oauth2.device.authorization.grant.enabled": false,
+        "oidc.ciba.grant.enabled": false
+      },
+      "alwaysDisplayInConsole": false,
+      "rootUrl": "https://granth.vgurukool.com",
+      "baseUrl": "/",
+      "redirectUris": [
+        "https://granth.vgurukool.com/oauth2/callback"
+      ],
+      "webOrigins": [
+        "https://granth.vgurukool.com"
+      ]
+    }
 ---
 apiVersion: batch/v1
 kind: Job
@@ -404,6 +433,9 @@ spec:
               
               add_client_scope "argo-workflows" "Argo Workflows"
               get_client_secret "argo-workflows" "ARGO_WORKFLOWS_CLIENT_SECRET"
+
+              create_client "Calibre-Web" "/var/config/calibre-web-client-payload.json"
+              add_client_scope "calibre-web" "Calibre-Web"
 
               echo "Creating ArgoCD session token for backstage"
               ARGOCD_PASSWORD=$(./kubectl -n argocd get secret argocd-initial-admin-secret -o go-template='{{.data.password | base64decode }}')
