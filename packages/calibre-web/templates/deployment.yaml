@@ -18,6 +18,31 @@ spec:
       labels:
         {{- include "calibre-web.selectorLabels" . | nindent 8 }}
     spec:
+      initContainers:
+        - name: init-calibre-db
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              if [ ! -f /books/metadata.db ]; then
+                echo "Initializing blank Calibre metadata.db in /books..."
+                if [ -f /app/calibre-web/library/metadata.db ]; then
+                  cp /app/calibre-web/library/metadata.db /books/metadata.db
+                else
+                  curl -sSL -o /books/metadata.db https://raw.githubusercontent.com/janeczku/calibre-web/master/library/metadata.db
+                fi
+                chown -R 1000:1000 /books
+                chmod 664 /books/metadata.db
+                echo "metadata.db created successfully."
+              else
+                echo "metadata.db already exists."
+              fi
+          volumeMounts:
+            - name: data-volume
+              mountPath: /books
+              subPath: books
       containers:
         # 1. Calibre-Web Main Container
         - name: calibre-web
