@@ -85,6 +85,8 @@ spec:
             - --pass-user-headers=true
             - --pass-access-token=true
             - --ssl-insecure-skip-verify=true
+            - --oidc-extra-audience=account
+            - --insecure-oidc-allow-unverified-email=true
           envFrom:
             - secretRef:
                 name: {{ include "calibre-web.fullname" . }}-oauth2-proxy
