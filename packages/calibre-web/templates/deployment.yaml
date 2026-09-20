@@ -39,6 +39,31 @@ spec:
               else
                 echo "metadata.db already exists."
               fi
+
+              # Ensure schema compatibility (Calibre 7+ schema 27 compatibility with Calibre-Web)
+              if [ -f /books/metadata.db ]; then
+                python3 -c "
+                import sqlite3
+                try:
+                    conn = sqlite3.connect('/books/metadata.db')
+                    c = conn.cursor()
+                    c.execute('PRAGMA table_info(books)')
+                    cols = [r[1] for r in c.fetchall()]
+                    if 'isbn' not in cols:
+                        print('Adding missing column books.isbn...')
+                        c.execute('ALTER TABLE books ADD COLUMN isbn TEXT DEFAULT \"\"')
+                    if 'flags' not in cols:
+                        print('Adding missing column books.flags...')
+                        c.execute('ALTER TABLE books ADD COLUMN flags INTEGER DEFAULT 1')
+                    conn.commit()
+                    conn.close()
+                    print('Schema compatibility verified.')
+                except Exception as e:
+                    print('Schema check error:', e)
+                "
+                chown -R 1000:1000 /books
+                chmod 664 /books/metadata.db
+              fi
           volumeMounts:
             - name: data-volume
               mountPath: /books
