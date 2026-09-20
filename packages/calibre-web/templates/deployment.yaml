@@ -45,17 +45,23 @@ spec:
               subPath: books
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8083
+            failureThreshold: 30
+            periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /
               port: 8083
-            initialDelaySeconds: 15
+            initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /
               port: 8083
-            initialDelaySeconds: 30
+            initialDelaySeconds: 10
             periodSeconds: 20
 
         {{- if .Values.sso.enabled }}
