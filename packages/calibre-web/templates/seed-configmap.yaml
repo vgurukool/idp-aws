@@ -33,25 +33,7 @@ data:
       fi
 
       # Fix schema compatibility (Calibre 7+ schema 27 drops isbn and flags, but Calibre-Web queries them)
-      python3 -c "
-      import sqlite3
-      try:
-          conn = sqlite3.connect('/books/metadata.db')
-          c = conn.cursor()
-          c.execute('PRAGMA table_info(books)')
-          cols = [r[1] for r in c.fetchall()]
-          if 'isbn' not in cols:
-              print('Restoring books.isbn column...')
-              c.execute('ALTER TABLE books ADD COLUMN isbn TEXT DEFAULT \"\"')
-          if 'flags' not in cols:
-              print('Restoring books.flags column...')
-              c.execute('ALTER TABLE books ADD COLUMN flags INTEGER DEFAULT 1')
-          conn.commit()
-          conn.close()
-          print('metadata.db schema compatibility guaranteed.')
-      except Exception as e:
-          print('Schema patch error:', e)
-      "
+      python3 -c "import sqlite3; conn = sqlite3.connect('/books/metadata.db'); c = conn.cursor(); c.execute('PRAGMA table_info(books)'); cols = [r[1] for r in c.fetchall()]; (c.execute('ALTER TABLE books ADD COLUMN isbn TEXT DEFAULT \"\"') if 'isbn' not in cols else None); (c.execute('ALTER TABLE books ADD COLUMN flags INTEGER DEFAULT 1') if 'flags' not in cols else None); conn.commit(); conn.close(); print('metadata.db schema compatibility guaranteed.')"
 
       rm -rf /tmp/seed
       chown -R 1000:1000 /books
