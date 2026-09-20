@@ -68,6 +68,9 @@ spec:
             - name: data-volume
               mountPath: /books
               subPath: books
+            - name: seed-scripts
+              mountPath: /custom-cont-init.d/01-seed-books.sh
+              subPath: 01-seed-books.sh
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           startupProbe:
@@ -136,3 +139,7 @@ spec:
         {{- else }}
           emptyDir: {}
         {{- end }}
+        - name: seed-scripts
+          configMap:
+            name: {{ include "calibre-web.fullname" . }}-seed-scripts
+            defaultMode: 0755

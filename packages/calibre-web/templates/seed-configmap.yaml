@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "calibre-web.fullname" . }}-seed-scripts
+  labels:
+    {{- include "calibre-web.labels" . | nindent 4 }}
+data:
+  01-seed-books.sh: |
+    #!/bin/bash
+    set -e
+    if [ ! -f /books/.seeded ]; then
+      echo "==> [Granth Seeder] Seeding canonical Vedic scriptures into Calibre library..."
+      mkdir -p /tmp/seed
+
+      echo "Downloading The Bhagavad Gita (The Song Celestial)..."
+      curl -sSL -o /tmp/seed/bhagavad_gita.epub "https://www.gutenberg.org/cache/epub/2388/pg2388-images-3.epub" || true
+
+      echo "Downloading The Upanishads..."
+      curl -sSL -o /tmp/seed/the_upanishads.epub "https://www.gutenberg.org/cache/epub/3283/pg3283-images-3.epub" || true
+
+      echo "Downloading Patanjali Yoga Sutras..."
+      curl -sSL -o /tmp/seed/yoga_sutras.epub "https://www.gutenberg.org/cache/epub/12470/pg12470-images-3.epub" || true
+
+      echo "Downloading The Ramayan of Valmiki..."
+      curl -sSL -o /tmp/seed/ramayana.epub "https://www.gutenberg.org/cache/epub/24869/pg24869-images-3.epub" || true
+
+      echo "Downloading Siddhartha..."
+      curl -sSL -o /tmp/seed/siddhartha.epub "https://www.gutenberg.org/cache/epub/2500/pg2500-images-3.epub" || true
+
+      if command -v calibredb >/dev/null 2>&1; then
+        echo "Importing into /books via calibredb..."
+        calibredb add --with-library /books /tmp/seed/*.epub || true
+      fi
+
+      rm -rf /tmp/seed
+      chown -R 1000:1000 /books
+      touch /books/.seeded
+      echo "==> [Granth Seeder] Library successfully seeded with canonical scriptures!"
+    else
+      echo "==> [Granth Seeder] Library already seeded, skipping."
+    fi
