@@ -106,6 +106,37 @@ body.vgurukool-body {
   padding: 1rem 0;
 }
 
+
+.vg-logo-wrapper {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #F59E0B, #EA580C, #FBBF24);
+  box-shadow: 0 10px 25px -5px rgba(234, 88, 12, 0.35);
+  margin-bottom: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.vg-logo-wrapper:hover {
+  transform: scale(1.06);
+}
+
+.vg-logo-inner {
+  width: 64px;
+  height: 64px;
+  background-color: #020617;
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+
+.vg-logo-mark {
+  width: 100%;
+  height: 100%;
+}
+
 /* Brand Header */
 .vg-brand-header {
   text-align: center;

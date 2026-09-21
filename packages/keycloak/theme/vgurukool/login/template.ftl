@@ -130,6 +130,37 @@ body.vgurukool-body {
   padding: 1rem 0;
 }
 
+
+.vg-logo-wrapper {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #F59E0B, #EA580C, #FBBF24);
+  box-shadow: 0 10px 25px -5px rgba(234, 88, 12, 0.35);
+  margin-bottom: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.vg-logo-wrapper:hover {
+  transform: scale(1.06);
+}
+
+.vg-logo-inner {
+  width: 64px;
+  height: 64px;
+  background-color: #020617;
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+
+.vg-logo-mark {
+  width: 100%;
+  height: 100%;
+}
+
 /* Brand Header */
 .vg-brand-header {
   text-align: center;
@@ -544,13 +575,44 @@ body.vgurukool-body {
     <main class="vg-main-container">
         <!-- Brand Header -->
         <div class="vg-brand-header">
-            <div class="vg-om-wrapper">
-                <div class="vg-om-inner">
-                    <span class="vg-om-symbol">&#x0950;</span>
+                        <div class="vg-logo-wrapper">
+                <div class="vg-logo-inner">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="vg-logo-mark">
+                        <defs>
+                            <linearGradient id="kcLogoGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#FDE68A" />
+                                <stop offset="50%" stop-color="#F59E0B" />
+                                <stop offset="100%" stop-color="#EA580C" />
+                            </linearGradient>
+                            <linearGradient id="kcLogoFlame" x1="0%" y1="100%" x2="0%" y2="0%">
+                                <stop offset="0%" stop-color="#EA580C" />
+                                <stop offset="50%" stop-color="#F59E0B" />
+                                <stop offset="100%" stop-color="#FEF08A" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Lotus Petals Halo -->
+                        <g stroke="url(#kcLogoGold)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                            <path d="M50 10 C54 20 54 28 50 36 C46 28 46 20 50 10 Z" fill="url(#kcLogoGold)" fill-opacity="0.25" />
+                            <path d="M42 16 C39 25 43 33 48 37 C43 32 39 26 42 16 Z" fill="url(#kcLogoGold)" fill-opacity="0.2" />
+                            <path d="M58 16 C61 25 57 33 52 37 C57 32 61 26 58 16 Z" fill="url(#kcLogoGold)" fill-opacity="0.2" />
+                            <path d="M33 24 C29 32 34 40 42 42 C35 38 31 33 33 24 Z" fill="url(#kcLogoGold)" fill-opacity="0.15" />
+                            <path d="M67 24 C71 32 66 40 58 42 C65 38 69 33 67 24 Z" fill="url(#kcLogoGold)" fill-opacity="0.15" />
+                            <path d="M25 35 C22 43 28 49 38 48 C30 46 25 41 25 35 Z" fill="url(#kcLogoGold)" fill-opacity="0.12" />
+                            <path d="M75 35 C78 43 72 49 62 48 C70 46 75 41 75 35 Z" fill="url(#kcLogoGold)" fill-opacity="0.12" />
+                        </g>
+                        <!-- Ascending Flame Core -->
+                        <path d="M50 24 C55 34 57 44 52 53 C49 58 44 54 48 48 C51 42 47 36 50 24 Z" fill="url(#kcLogoFlame)" />
+                        <path d="M48 38 C45 45 47 52 50 56 C47 54 44 48 48 38 Z" fill="#FEF08A" />
+                        <!-- Geometric 'V' Pedestal -->
+                        <g fill="url(#kcLogoGold)">
+                            <path d="M32 46 L47 76 L50 82 L53 76 L68 46 L60 46 L50 67 L40 46 Z" />
+                            <path d="M26 46 L47 87 L50 94 L53 87 L74 46 L68 46 L50 82 L32 46 Z" fill-opacity="0.65" />
+                        </g>
+                    </svg>
                 </div>
             </div>
             <h1 class="vg-brand-title">
-                <span class="vg-brand-name">GURUKOOL</span>
+                <span class="vg-brand-name">VGURUKOOL</span>
                 <span class="vg-sso-badge">SSO</span>
             </h1>
             <p class="vg-brand-tagline">Ancient Wisdom &bull; Modern Sovereign Intelligence</p>
