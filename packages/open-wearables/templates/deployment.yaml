@@ -52,6 +52,11 @@ spec:
               value: {{ .Values.env.DHANYA_LAKSHMI_WEBHOOK_URL | quote }}
             - name: SVIX_ENABLED
               value: {{ .Values.env.SVIX_ENABLED | quote }}
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "open-wearables.fullname" . }}-secret
+                  key: SECRET_KEY
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           startupProbe:
