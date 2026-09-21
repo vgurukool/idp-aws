@@ -7,6 +7,16 @@ image:
   registry: docker.io
   repository: bitnamilegacy/keycloak
 
+extraVolumes:
+  - name: vgurukool-theme
+    configMap:
+      name: vgurukool-theme
+
+extraVolumeMounts:
+  - name: vgurukool-theme
+    mountPath: /opt/bitnami/keycloak/themes/vgurukool/login
+    readOnly: true
+
 global:
   defaultStorageClass: gp3
   security:

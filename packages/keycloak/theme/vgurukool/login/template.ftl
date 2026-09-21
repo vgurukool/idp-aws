@@ -1,0 +1,610 @@
+<#macro registrationLayout displayInfo=false displayMessage=true displayRequiredFields=false showAnotherWayIfPresent=true>
+<!DOCTYPE html>
+<html lang="${(locale.currentLanguageTag)!'en'}" class="h-full">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>${msg("loginTitle", ((realm.displayName)!'Vgurukool Sovereign Identity'))}</title>
+    <link rel="icon" href="${url.resourcesPath}/img/favicon.ico" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <#if properties.styles?has_content>
+        <#list properties.styles?split(' ') as style>
+            <link href="${url.resourcesPath}/${style}" rel="stylesheet" />
+        </#list>
+    </#if>
+
+    <style>
+/* ==========================================================================
+   Vgurukool Sovereign Identity — Keycloak SSO Theme Stylesheet
+   ========================================================================== */
+
+:root {
+  --vg-bg-deep: #020617;
+  --vg-card-bg: rgba(15, 23, 42, 0.82);
+  --vg-card-border: rgba(245, 158, 11, 0.24);
+  --vg-gold-primary: #F59E0B;
+  --vg-gold-light: #FDE68A;
+  --vg-orange-primary: #EA580C;
+  --vg-text-main: #F8FAFC;
+  --vg-text-muted: #94A3B8;
+  --vg-input-bg: rgba(2, 6, 23, 0.88);
+  --vg-input-border: rgba(51, 65, 85, 0.8);
+  --vg-input-focus: #F59E0B;
+  --vg-error: #EF4444;
+  --vg-font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --vg-font-cinzel: 'Cinzel', serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body.vgurukool-body {
+  font-family: var(--vg-font-sans);
+  background-color: var(--vg-bg-deep);
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.16), transparent 45%),
+    radial-gradient(circle at 100% 100%, rgba(234, 88, 12, 0.08), transparent 35%),
+    radial-gradient(circle at 0% 100%, rgba(217, 119, 6, 0.08), transparent 35%);
+  color: var(--vg-text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------------------
+   Top Status Bar
+   -------------------------------------------------------------------------- */
+.vg-top-bar {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0.85;
+  font-size: 0.75rem;
+}
+
+.vg-top-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(245, 158, 11, 0.85);
+}
+
+.vg-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--vg-gold-primary);
+  box-shadow: 0 0 10px var(--vg-gold-primary);
+  animation: vgPulse 2s infinite;
+}
+
+@keyframes vgPulse {
+  0% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 0.4; transform: scale(0.9); }
+}
+
+.vg-top-right {
+  color: var(--vg-text-muted);
+}
+
+.vg-realm-badge {
+  color: var(--vg-gold-primary);
+  font-family: monospace;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   Main Login Card Container
+   -------------------------------------------------------------------------- */
+.vg-main-container {
+  width: 100%;
+  max-width: 440px;
+  margin: auto 0;
+  padding: 1rem 0;
+}
+
+/* Brand Header */
+.vg-brand-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.vg-om-wrapper {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #F59E0B, #EA580C, #FBBF24);
+  box-shadow: 0 10px 25px -5px rgba(234, 88, 12, 0.35);
+  margin-bottom: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.vg-om-wrapper:hover {
+  transform: scale(1.06);
+}
+
+.vg-om-inner {
+  width: 56px;
+  height: 56px;
+  background-color: #020617;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vg-om-symbol {
+  font-size: 2rem;
+  color: var(--vg-gold-primary);
+  font-weight: bold;
+  user-select: none;
+  line-height: 1;
+}
+
+.vg-brand-title {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.vg-brand-name {
+  font-family: var(--vg-font-cinzel);
+  letter-spacing: 0.08em;
+}
+
+.vg-sso-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--vg-gold-primary);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  vertical-align: middle;
+}
+
+.vg-brand-tagline {
+  font-size: 0.75rem;
+  color: var(--vg-text-muted);
+  margin-top: 0.35rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Glass Card */
+.vg-card {
+  background: var(--vg-card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--vg-card-border);
+  border-radius: 24px;
+  padding: 2rem 2.25rem;
+  box-shadow: 
+    0 25px 60px -15px rgba(0, 0, 0, 0.85),
+    0 0 35px rgba(245, 158, 11, 0.08);
+}
+
+.vg-card-header {
+  margin-bottom: 1.5rem;
+}
+
+.vg-page-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+}
+
+.vg-card-subtitle {
+  font-size: 0.75rem;
+  color: var(--vg-text-muted);
+  margin-top: 0.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   Alerts & Notifications
+   -------------------------------------------------------------------------- */
+.vg-alert {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.vg-alert-error {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #FCA5A5;
+}
+
+.vg-alert-warning {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #FDE68A;
+}
+
+.vg-alert-success {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6EE7B7;
+}
+
+.vg-alert-info {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #BAE6FD;
+}
+
+.vg-alert-icon {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* --------------------------------------------------------------------------
+   Forms & Controls
+   -------------------------------------------------------------------------- */
+.vg-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.vg-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.vg-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vg-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #CBD5E1;
+}
+
+.vg-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.vg-field-icon {
+  position: absolute;
+  left: 0.85rem;
+  width: 18px;
+  height: 18px;
+  color: #64748B;
+  pointer-events: none;
+}
+
+.vg-input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.6rem;
+  background-color: var(--vg-input-bg);
+  border: 1px solid var(--vg-input-border);
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.vg-input::placeholder {
+  color: #475569;
+}
+
+.vg-input:focus {
+  border-color: var(--vg-input-focus);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.22);
+}
+
+.vg-toggle-pwd {
+  position: absolute;
+  right: 0.85rem;
+  background: transparent;
+  border: none;
+  color: #64748B;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.vg-toggle-pwd:hover {
+  color: #CBD5E1;
+}
+
+.vg-eye-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.vg-field-error {
+  font-size: 0.7rem;
+  color: var(--vg-error);
+  margin-top: 0.25rem;
+}
+
+.vg-link-forgot {
+  font-size: 0.75rem;
+  color: var(--vg-gold-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.vg-link-forgot:hover {
+  color: var(--vg-gold-light);
+  text-decoration: underline;
+}
+
+/* Checkbox */
+.vg-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-top: 0.25rem;
+}
+
+.vg-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  accent-color: var(--vg-gold-primary);
+  cursor: pointer;
+}
+
+.vg-checkbox-label {
+  font-size: 0.75rem;
+  color: #CBD5E1;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Primary Submit Button */
+.vg-btn-row {
+  padding-top: 0.5rem;
+}
+
+.vg-btn-primary {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 800;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  color: #020617;
+  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
+  box-shadow: 0 10px 25px -5px rgba(234, 88, 12, 0.35);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.vg-btn-primary:hover {
+  background: linear-gradient(135deg, #FBBF24 0%, #F97316 100%);
+  box-shadow: 0 12px 30px -5px rgba(234, 88, 12, 0.45);
+  transform: translateY(-1px);
+}
+
+.vg-btn-primary:active {
+  transform: translateY(0);
+}
+
+.vg-btn-arrow {
+  width: 16px;
+  height: 16px;
+}
+
+/* Registration Section */
+.vg-register-section {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.6);
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--vg-text-muted);
+}
+
+.vg-register-link {
+  color: var(--vg-gold-primary);
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 0.3rem;
+  transition: color 0.15s ease;
+}
+
+.vg-register-link:hover {
+  color: var(--vg-gold-light);
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Ecosystem Apps Strip & Footer
+   -------------------------------------------------------------------------- */
+.vg-apps-strip {
+  margin-top: 1.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 0.6rem;
+  font-size: 0.7rem;
+  color: #64748B;
+}
+
+.vg-app-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.vg-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.dot-emerald { background-color: #10B981; }
+.dot-amber   { background-color: #F59E0B; }
+.dot-indigo  { background-color: #6366F1; }
+.dot-sky     { background-color: #38BDF8; }
+
+.vg-dot-sep {
+  opacity: 0.4;
+}
+
+.vg-footer {
+  width: 100%;
+  max-width: 1200px;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #64748B;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .vg-card {
+    padding: 1.75rem 1.5rem;
+    border-radius: 20px;
+  }
+  .vg-brand-title {
+    font-size: 1.5rem;
+  }
+}
+
+    </style>
+</head>
+
+<body class="vgurukool-body">
+    <!-- Top System Banner -->
+    <header class="vg-top-bar">
+        <div class="vg-top-left">
+            <span class="vg-pulse-dot"></span>
+            <span>CNOE Sovereign Identity Hub</span>
+        </div>
+        <div class="vg-top-right">
+            Realm: <span class="vg-realm-badge">${(realm.name)!'cnoe'}</span>
+        </div>
+    </header>
+
+    <!-- Center Content -->
+    <main class="vg-main-container">
+        <!-- Brand Header -->
+        <div class="vg-brand-header">
+            <div class="vg-om-wrapper">
+                <div class="vg-om-inner">
+                    <span class="vg-om-symbol">&#x0950;</span>
+                </div>
+            </div>
+            <h1 class="vg-brand-title">
+                <span class="vg-brand-name">GURUKOOL</span>
+                <span class="vg-sso-badge">SSO</span>
+            </h1>
+            <p class="vg-brand-tagline">Ancient Wisdom &bull; Modern Sovereign Intelligence</p>
+        </div>
+
+        <!-- Glassmorphism Card -->
+        <div class="vg-card">
+            <div class="vg-card-header">
+                <h2 class="vg-page-title"><#nested "header"></h2>
+                <#if displayInfo>
+                    <p class="vg-card-subtitle"><#nested "info"></p>
+                </#if>
+            </div>
+
+            <!-- Global Feedback Message -->
+            <#if displayMessage && (message)?has_content && ((message.type)!'') != 'warning'>
+                <div class="vg-alert vg-alert-${message.type}">
+                    <#if message.type = 'success'><span class="vg-alert-icon">&check;</span></#if>
+                    <#if message.type = 'warning'><span class="vg-alert-icon">&excl;</span></#if>
+                    <#if message.type = 'error'><span class="vg-alert-icon">&times;</span></#if>
+                    <#if message.type = 'info'><span class="vg-alert-icon">&quest;</span></#if>
+                    <span class="vg-alert-text">${kcSanitize(message.summary)?no_esc}</span>
+                </div>
+            </#if>
+
+            <!-- Main Form Injection -->
+            <div class="vg-form-wrapper">
+                <#nested "form">
+            </div>
+
+            <!-- Social / Identity Providers Injection -->
+            <#if (realm.password)!false && (social.providers)??>
+                <div class="vg-social-section">
+                    <#nested "socialProviders">
+                </div>
+            </#if>
+        </div>
+
+        <!-- Supported Ecosystem Apps Indicator -->
+        <div class="vg-apps-strip">
+            <span class="vg-app-pill"><span class="vg-pill-dot dot-emerald"></span>Learnhouse LMS</span>
+            <span class="vg-dot-sep">&bull;</span>
+            <span class="vg-app-pill"><span class="vg-pill-dot dot-amber"></span>Ashta Lakshmi</span>
+            <span class="vg-dot-sep">&bull;</span>
+            <span class="vg-app-pill"><span class="vg-pill-dot dot-indigo"></span>CAIPE AI Hub</span>
+            <span class="vg-dot-sep">&bull;</span>
+            <span class="vg-app-pill"><span class="vg-pill-dot dot-sky"></span>Granth Library</span>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="vg-footer">
+        <p>Protected by Keycloak OIDC &bull; Sovereign Vedic Learning &amp; Abundance Architecture</p>
+    </footer>
+</body>
+</html>
+</#macro>
