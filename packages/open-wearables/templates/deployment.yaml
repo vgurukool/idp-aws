@@ -86,7 +86,7 @@ spec:
             - --client-secret=$(OAUTH2_PROXY_CLIENT_SECRET)
             - --cookie-secret=$(OAUTH2_PROXY_COOKIE_SECRET)
             - --oidc-issuer-url={{ .Values.sso.keycloak.issuerUrl }}
-            - --scope=openid email profile groups
+            - --scope=openid email profile
             - --email-domain=*
             - --cookie-secure=true
             - --cookie-domain={{ .Values.sso.cookie.domain }}
