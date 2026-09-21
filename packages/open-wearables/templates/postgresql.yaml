@@ -19,10 +19,20 @@ spec:
         {{- include "open-wearables.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: database
     spec:
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: Always
       containers:
         - name: postgresql
           image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
           imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+          securityContext:
+            runAsUser: 1001
+            runAsGroup: 1001
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - containerPort: 5432
               name: postgresql

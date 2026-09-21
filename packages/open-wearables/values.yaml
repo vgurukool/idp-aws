@@ -2,7 +2,7 @@
 replicaCount: 1
 
 image:
-  repository: openwearables/platform
+  repository: themomentum/open-wearables-backend
   tag: "latest"
   pullPolicy: IfNotPresent
 
