@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "open-wearables.fullname" . }}
+  labels:
+    {{- include "open-wearables.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "open-wearables.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+      labels:
+        {{- include "open-wearables.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        # 1. Open Wearables Main Application Container
+        - name: open-wearables
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.env.ENVIRONMENT | quote }}
+            - name: PORT
+              value: {{ .Values.env.PORT | quote }}
+            - name: DB_HOST
+              value: "{{ include "open-wearables.fullname" . }}-db"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: {{ .Values.postgresql.auth.database | quote }}
+            - name: DB_USER
+              value: {{ .Values.postgresql.auth.username | quote }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "open-wearables.fullname" . }}-secret
+                  key: DB_PASSWORD
+            - name: REDIS_HOST
+              value: "{{ include "open-wearables.fullname" . }}-redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: DHANYA_LAKSHMI_WEBHOOK_URL
+              value: {{ .Values.env.DHANYA_LAKSHMI_WEBHOOK_URL | quote }}
+            - name: SVIX_ENABLED
+              value: {{ .Values.env.SVIX_ENABLED | quote }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          startupProbe:
+            tcpSocket:
+              port: 8000
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+        {{- if .Values.sso.enabled }}
+        # 2. Keycloak SSO Sidecar (oauth2-proxy)
+        - name: oauth2-proxy
+          image: "{{ .Values.sso.image.repository }}:{{ .Values.sso.image.tag }}"
+          imagePullPolicy: {{ .Values.sso.image.pullPolicy }}
+          args:
+            - --provider=keycloak-oidc
+            - --client-id=$(OAUTH2_PROXY_CLIENT_ID)
+            - --client-secret=$(OAUTH2_PROXY_CLIENT_SECRET)
+            - --cookie-secret=$(OAUTH2_PROXY_COOKIE_SECRET)
+            - --oidc-issuer-url={{ .Values.sso.keycloak.issuerUrl }}
+            - --scope=openid email profile groups
+            - --email-domain=*
+            - --cookie-secure=true
+            - --cookie-domain={{ .Values.sso.cookie.domain }}
+            - --cookie-samesite=lax
+            - --cookie-expire=8h
+            - --cookie-refresh=1h
+            - --reverse-proxy=true
+            - --set-xauthrequest=true
+            - --pass-user-headers=true
+            - --pass-access-token=true
+            - --pass-authorization-header=true
+            - --http-address=0.0.0.0:4180
+            - --upstream=http://127.0.0.1:8000/
+            - --whitelist-domain=wearables.vgurukool.com
+            - --skip-provider-button=true
+            - --silence-ping-logging=true
+          envFrom:
+            - secretRef:
+                name: {{ include "open-wearables.fullname" . }}-secret
+          ports:
+            - name: oauth2-proxy
+              containerPort: 4180
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 4180
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 4180
+            initialDelaySeconds: 10
+            periodSeconds: 20
+        {{- end }}

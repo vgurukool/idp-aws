@@ -1,0 +1,106 @@
+# Open Wearables Helm Values for Vgurukool (Dhanya Lakshmi)
+replicaCount: 1
+
+image:
+  repository: openwearables/platform
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+    nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
+    # Keycloak SSO Authentication via oauth2-proxy sidecar
+    nginx.ingress.kubernetes.io/auth-url: "https://wearables.vgurukool.com/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://wearables.vgurukool.com/oauth2/start?rd=$escaped_request_uri"
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Request-User,X-Auth-Request-Email,X-Auth-Request-Preferred-Username"
+  hosts:
+    - host: wearables.vgurukool.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: wearables-vgurukool-tls
+      hosts:
+        - wearables.vgurukool.com
+
+# OAuth2-Proxy Sidecar Configuration for Keycloak SSO
+sso:
+  enabled: true
+  image:
+    repository: quay.io/oauth2-proxy/oauth2-proxy
+    tag: "v7.6.0"
+    pullPolicy: IfNotPresent
+  port: 4180
+  keycloak:
+    issuerUrl: "https://platform.vgurukool.com/keycloak/realms/cnoe"
+    clientId: "open-wearables"
+    clientSecret: "open-wearables-sso-secret-2026"
+  cookie:
+    secret: "3f829a1b0c4e7d5f6a8b2c1d9e0f3a4b" # 32-byte secret for AES-256 cipher
+    domain: ".vgurukool.com"
+
+# PostgreSQL Database Configuration
+postgresql:
+  enabled: true
+  image:
+    repository: bitnamilegacy/postgresql
+    tag: "17.4.0-debian-12-r17"
+    pullPolicy: IfNotPresent
+  auth:
+    database: openwearables
+    username: openwearables
+    password: "ow_secure_db_pass_2026"
+  persistence:
+    enabled: true
+    storageClass: "gp3"
+    size: 5Gi
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+# Redis Cache & Broker Configuration
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: "7.2-alpine"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 25m
+      memory: 64Mi
+
+# Application Backend Environment Settings
+env:
+  ENVIRONMENT: "production"
+  PORT: "8000"
+  DHANYA_LAKSHMI_WEBHOOK_URL: "http://dhanya-lakshmi.vgurukool.svc.cluster.local:3003/api/wearables/sync"
+  SVIX_ENABLED: "false"
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
