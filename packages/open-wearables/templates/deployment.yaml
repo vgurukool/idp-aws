@@ -34,6 +34,8 @@ spec:
               value: {{ .Values.env.ENVIRONMENT | quote }}
             - name: PORT
               value: {{ .Values.env.PORT | quote }}
+            - name: API_BASE_URL
+              value: {{ .Values.env.API_BASE_URL | default "https://wearables.vgurukool.com" | quote }}
             - name: DB_HOST
               value: "{{ include "open-wearables.fullname" . }}-db"
             - name: DB_PORT
