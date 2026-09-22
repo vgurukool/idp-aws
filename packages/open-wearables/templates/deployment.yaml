@@ -4,17 +4,20 @@ metadata:
   name: {{ include "open-wearables.fullname" . }}
   labels:
     {{- include "open-wearables.labels" . | nindent 4 }}
+    app.kubernetes.io/component: app
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "open-wearables.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: app
   template:
     metadata:
       annotations:
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
       labels:
         {{- include "open-wearables.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: app
     spec:
       containers:
         # 1. Open Wearables Main Application Container
