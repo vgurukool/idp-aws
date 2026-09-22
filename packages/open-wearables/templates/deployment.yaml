@@ -107,6 +107,11 @@ spec:
             - --whitelist-domain=wearables.vgurukool.com
             - --skip-provider-button=true
             - --silence-ping-logging=true
+            - --session-store-type=redis
+            - --redis-connection-url=redis://{{ include "open-wearables.fullname" . }}-redis:6379
+            - --skip-auth-route=^/openapi\.json
+            - --skip-auth-route=^/docs
+            - --skip-auth-route=^/redoc
           envFrom:
             - secretRef:
                 name: {{ include "open-wearables.fullname" . }}-secret
