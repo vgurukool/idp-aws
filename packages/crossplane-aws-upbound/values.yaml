@@ -50,3 +50,4 @@ providerConfig:
 providers:
 - dynamodb
 - s3
+- lambda
