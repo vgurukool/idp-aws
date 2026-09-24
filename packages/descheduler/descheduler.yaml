@@ -82,13 +82,13 @@ data:
           - name: LowNodeUtilization
             args:
               thresholds:
-                "cpu": 25
-                "memory": 25
-                "pods": 25
-              targetThresholds:
                 "cpu": 50
                 "memory": 50
                 "pods": 50
+              targetThresholds:
+                "cpu": 75
+                "memory": 75
+                "pods": 75
           - name: RemovePodsViolatingTopologySpreadConstraint
           - name: RemovePodsViolatingInterPodAntiAffinity
         plugins:
