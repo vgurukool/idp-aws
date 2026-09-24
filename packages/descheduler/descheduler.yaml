@@ -1,0 +1,152 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: descheduler
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: descheduler
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: descheduler
+  labels:
+    app.kubernetes.io/name: descheduler
+rules:
+  - apiGroups: ["events.k8s.io"]
+    resources: ["events"]
+    verbs: ["create", "update"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "watch", "list", "delete"]
+  - apiGroups: [""]
+    resources: ["pods/eviction"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["policy"]
+    resources: ["poddisruptionbudgets"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["apps"]
+    resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["scheduling.k8s.io"]
+    resources: ["priorityclasses"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: descheduler
+  labels:
+    app.kubernetes.io/name: descheduler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: descheduler
+subjects:
+  - kind: ServiceAccount
+    name: descheduler
+    namespace: kube-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: descheduler-policy
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: descheduler
+data:
+  policy.yaml: |
+    apiVersion: "descheduler/v1alpha2"
+    kind: "DeschedulerPolicy"
+    profiles:
+      - name: default
+        pluginConfig:
+          - name: DefaultEvictor
+            args:
+              evictLocalStoragePods: true
+              evictSystemCriticalPods: false
+              ignorePvcPods: true # Protects EBS volumes from unnecessary detach/reattach cycles
+          - name: RemoveDuplicates
+          - name: LowNodeUtilization
+            args:
+              thresholds:
+                "cpu": 25
+                "memory": 25
+                "pods": 25
+              targetThresholds:
+                "cpu": 50
+                "memory": 50
+                "pods": 50
+          - name: RemovePodsViolatingTopologySpreadConstraint
+          - name: RemovePodsViolatingInterPodAntiAffinity
+        plugins:
+          balance:
+            enabled:
+              - RemoveDuplicates
+              - LowNodeUtilization
+              - RemovePodsViolatingTopologySpreadConstraint
+          deschedule:
+            enabled:
+              - RemovePodsViolatingInterPodAntiAffinity
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: descheduler
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: descheduler
+spec:
+  schedule: "*/15 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: descheduler
+        spec:
+          serviceAccountName: descheduler
+          restartPolicy: OnFailure
+          containers:
+            - name: descheduler
+              image: registry.k8s.io/descheduler/descheduler:v0.31.0
+              imagePullPolicy: IfNotPresent
+              command:
+                - "/bin/descheduler"
+              args:
+                - "--policy-config-file=/policy-dir/policy.yaml"
+                - "--v=3"
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsNonRoot: true
+                runAsUser: 10001
+              volumeMounts:
+                - mountPath: /policy-dir
+                  name: policy-volume
+          volumes:
+            - name: policy-volume
+              configMap:
+                name: descheduler-policy
