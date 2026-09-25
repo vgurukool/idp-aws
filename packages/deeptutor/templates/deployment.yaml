@@ -21,7 +21,10 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 8501
+              containerPort: 3782
+              protocol: TCP
+            - name: backend
+              containerPort: 8001
               protocol: TCP
           envFrom:
             - secretRef:
@@ -33,20 +36,20 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           startupProbe:
             httpGet:
-              path: /_stcore/health
-              port: 8501
+              path: /
+              port: 3782
             failureThreshold: 30
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /_stcore/health
-              port: 8501
+              path: /
+              port: 3782
             initialDelaySeconds: 15
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /_stcore/health
-              port: 8501
+              path: /
+              port: 3782
             initialDelaySeconds: 20
             periodSeconds: 20
 
@@ -61,7 +64,7 @@ spec:
             - --client-secret=$(OAUTH2_PROXY_CLIENT_SECRET)
             - --oidc-issuer-url={{ .Values.sso.keycloak.issuerUrl }}
             - --http-address=0.0.0.0:4180
-            - --upstream=http://127.0.0.1:8501/
+            - --upstream=http://127.0.0.1:3782/
             - --redirect-url=https://{{ (index .Values.ingress.hosts 0).host }}/oauth2/callback
             - --email-domain=*
             - --cookie-secure=true

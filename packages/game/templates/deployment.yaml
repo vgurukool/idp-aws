@@ -36,7 +36,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:
             httpGet:
-              path: /api/health
+              path: /api/v1/kpi/health_check
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 15
@@ -44,7 +44,7 @@ spec:
             failureThreshold: 4
           readinessProbe:
             httpGet:
-              path: /api/health
+              path: /api/v1/kpi/health_check
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 10

@@ -9,7 +9,7 @@ spec:
   ports:
     - name: http
       port: {{ .Values.service.port }}
-      targetPort: 8000
+      targetPort: {{ .Values.service.port }}
       protocol: TCP
     {{- if .Values.sso.enabled }}
     - name: oauth2-proxy

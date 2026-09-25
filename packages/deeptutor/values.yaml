@@ -2,13 +2,13 @@
 replicaCount: 1
 
 image:
-  repository: hkuds/deeptutor
+  repository: ghcr.io/hkuds/deeptutor
   tag: "latest"
   pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
-  port: 8501
+  port: 3782
 
 ingress:
   enabled: true
