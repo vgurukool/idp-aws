@@ -367,6 +367,31 @@ data:
         "https://karma.vgurukool.com"
       ]
     }
+  game-frontend-client-payload.json: |
+    {
+      "protocol": "openid-connect",
+      "clientId": "game-frontend",
+      "name": "Karma Vijaya GAME Dashboard Client",
+      "description": "Public PKCE client used by Karma Vijaya GAME Dashboard SPA",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "https://karma.vgurukool.com/*##https://karma.vgurukool.com"
+      },
+      "rootUrl": "https://karma.vgurukool.com",
+      "baseUrl": "/",
+      "redirectUris": [
+        "https://karma.vgurukool.com/*",
+        "https://karma.vgurukool.com/silent-check-sso.html"
+      ],
+      "webOrigins": [
+        "https://karma.vgurukool.com"
+      ]
+    }
 ---
 apiVersion: batch/v1
 kind: Job
@@ -574,6 +599,9 @@ spec:
 
               create_client "GAME" "/var/config/game-client-payload.json"
               add_client_scope "game" "GAME"
+
+              create_client "GAME Frontend" "/var/config/game-frontend-client-payload.json"
+              add_client_scope "game-frontend" "GAME Frontend"
 
               echo "Creating ArgoCD session token for backstage"
               ARGOCD_PASSWORD=$(./kubectl -n argocd get secret argocd-initial-admin-secret -o go-template='{{.data.password | base64decode }}')

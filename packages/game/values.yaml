@@ -1,14 +1,38 @@
 # Karma Vijaya (GAME) Helm Values
-replicaCount: 1
 
-image:
-  repository: ayusing/game
-  tag: "latest"
-  pullPolicy: Always
+api:
+  replicaCount: 1
+  image:
+    repository: ayusing/game
+    tag: "latest"
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
-service:
-  type: ClusterIP
-  port: 8080
+dashboard:
+  replicaCount: 1
+  image:
+    repository: ayusing/game-dashboard
+    tag: "latest"
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 3000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 ingress:
   enabled: true
@@ -23,8 +47,26 @@ ingress:
   hosts:
     - host: karma.vgurukool.com
       paths:
+        - path: /api
+          pathType: Prefix
+          service: api
+          port: 8080
+        - path: /docs
+          pathType: Prefix
+          service: api
+          port: 8080
+        - path: /openapi.json
+          pathType: Prefix
+          service: api
+          port: 8080
+        - path: /metrics
+          pathType: Prefix
+          service: api
+          port: 8080
         - path: /
           pathType: Prefix
+          service: dashboard
+          port: 3000
   tls:
     - secretName: karma-vgurukool-tls
       hosts:
@@ -47,15 +89,6 @@ keycloak:
 
 externalSecrets:
   enabled: true
-
-
-resources:
-  requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
 
 nodeSelector: {}
 tolerations: []

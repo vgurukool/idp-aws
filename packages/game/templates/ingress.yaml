@@ -34,9 +34,9 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $fullName }}
+                name: {{ if eq .service "dashboard" }}{{ $fullName }}-dashboard{{ else if eq .service "api" }}{{ $fullName }}-api{{ else }}{{ default (printf "%s-dashboard" $fullName) .service }}{{ end }}
                 port:
-                  number: {{ $.Values.service.port }}
+                  number: {{ default (eq .service "api" | ternary 8080 3000) .port }}
           {{- end }}
     {{- end }}
 {{- end }}

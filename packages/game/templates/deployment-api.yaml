@@ -1,25 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "game.fullname" . }}
+  name: {{ include "game.fullname" . }}-api
   labels:
     {{- include "game.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.api.replicaCount }}
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      {{- include "game.selectorLabels" . | nindent 6 }}
+      {{- include "game.apiSelectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "game.selectorLabels" . | nindent 8 }}
+        {{- include "game.apiSelectorLabels" . | nindent 8 }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: api
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
           ports:
             - name: http
               containerPort: 8080
@@ -47,7 +48,7 @@ spec:
             - secretRef:
                 name: {{ include "game.fullname" . }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.api.resources | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /api/v1/kpi/health_check

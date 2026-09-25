@@ -38,3 +38,21 @@ Selector labels
 app.kubernetes.io/name: {{ include "game.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Backend API selector labels
+*/}}
+{{- define "game.apiSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "game.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: api
+{{- end }}
+
+{{/*
+Dashboard frontend selector labels
+*/}}
+{{- define "game.dashboardSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "game.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: dashboard
+{{- end }}
