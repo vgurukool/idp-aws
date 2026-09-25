@@ -44,6 +44,16 @@ spec:
               value: "-"
             - name: ERROR_LOG
               value: "-"
+            - name: KEYCLOAK_URL
+              value: {{ .Values.keycloak.url | quote }}
+            - name: KEYCLOAK_URL_DOCKER
+              value: {{ .Values.keycloak.url | quote }}
+            - name: KEYCLOAK_REALM
+              value: {{ .Values.keycloak.realm | quote }}
+            - name: KEYCLOAK_CLIENT_ID
+              value: {{ .Values.keycloak.clientId | quote }}
+            - name: KEYCLOAK_AUDIENCE
+              value: {{ .Values.keycloak.audience | quote }}
           envFrom:
             - secretRef:
                 name: {{ include "game.fullname" . }}

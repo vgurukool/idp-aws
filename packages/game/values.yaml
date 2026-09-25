@@ -84,8 +84,11 @@ database:
   user: "game_user"
 
 keycloak:
+  url: "https://platform.vgurukool.com/keycloak"
   issuer: "https://platform.vgurukool.com/keycloak/realms/cnoe"
+  realm: "cnoe"
   clientId: "game"
+  audience: "game"
 
 externalSecrets:
   enabled: true
