@@ -53,10 +53,9 @@ postgresql:
   enabled: false
 
 externalDatabase:
-  host: "postgres-cluster.postgres.svc.cluster.local"
+  host: "postgres-postgresql.postgres.svc.cluster.local"
   port: 5432
-  user: "keycloak_user"
-  database: "keycloak_db"
-  password: "Keycloak2026SecurePass"
+  user: "keycloak"
+  database: "keycloak"
   existingSecret: "keycloak-config"
-  existingSecretPasswordKey: "KEYCLOAK_DB_PASSWORD"
+  existingSecretPasswordKey: "POSTGRES_PASSWORD"
