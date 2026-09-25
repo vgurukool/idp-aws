@@ -1,0 +1,9 @@
+apiVersion: v2
+name: deeptutor
+description: Socratic AI Acharya (DeepTutor) - Multi-Agent Socratic Personalized Tutoring with Continuous Keycloak SSO
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+maintainers:
+  - name: Vgurukool DevOps Team
+    email: devops@vgurukool.com

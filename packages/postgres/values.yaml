@@ -1,0 +1,51 @@
+# Default values for unified postgres cluster.
+replicaCount: 1
+
+image:
+  repository: postgres
+  tag: "16.2-alpine"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5432
+  name: postgres-cluster
+
+auth:
+  postgresPassword: "MasterPostgres2026AdminPass"
+  database: "postgres"
+  databasePasswords:
+    keycloak: "Keycloak2026SecurePass"
+    learnhouse: "LearnHouse2026SecurePass"
+    litellm: "LiteLLM2026SecurePass"
+    backstage: "Backstage2026SecurePass"
+    freelingo: "FreeLingo2026SecurePass"
+    game: "Game2026SecurePass"
+    ashta: "Ashta2026SecurePass"
+    openfga: "OpenFGA2026SecurePass"
+    openwearables: "OpenWearables2026SecurePass"
+    maic: "MAIC2026SecurePass"
+
+persistence:
+  enabled: true
+  storageClass: "gp3"
+  size: 25Gi
+  accessModes:
+    - ReadWriteOnce
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1536Mi
+
+securityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

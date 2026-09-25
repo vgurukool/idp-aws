@@ -1,0 +1,9 @@
+apiVersion: v2
+name: game
+description: Karma Vijaya (GAME) - Goals And Motivation Engine with Continuous Keycloak SSO & Postgres
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+maintainers:
+  - name: Vgurukool DevOps Team
+    email: devops@vgurukool.com

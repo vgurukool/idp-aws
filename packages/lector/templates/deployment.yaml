@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lector.fullname" . }}
+  labels:
+    {{- include "lector.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "lector.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "lector.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        # 1. Granth Svadhyaya (Lector) Scripture Reader Container
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8000
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+        {{- if .Values.sso.enabled }}
+        # 2. OAuth2-Proxy Sidecar Container for Keycloak SSO
+        - name: oauth2-proxy
+          image: "{{ .Values.sso.image.repository }}:{{ .Values.sso.image.tag }}"
+          imagePullPolicy: {{ .Values.sso.image.pullPolicy }}
+          args:
+            - --provider=keycloak-oidc
+            - --client-id=$(OAUTH2_PROXY_CLIENT_ID)
+            - --client-secret=$(OAUTH2_PROXY_CLIENT_SECRET)
+            - --oidc-issuer-url={{ .Values.sso.keycloak.issuerUrl }}
+            - --http-address=0.0.0.0:4180
+            - --upstream=http://127.0.0.1:8000/
+            - --redirect-url=https://{{ (index .Values.ingress.hosts 0).host }}/oauth2/callback
+            - --email-domain=*
+            - --cookie-secure=true
+            - --cookie-domain={{ .Values.sso.cookie.domain }}
+            - --cookie-samesite=lax
+            - --set-xauthrequest=true
+            - --pass-user-headers=true
+            - --pass-access-token=true
+            - --ssl-insecure-skip-verify=true
+            - --oidc-extra-audience=account
+            - --insecure-oidc-allow-unverified-email=true
+          envFrom:
+            - secretRef:
+                name: {{ include "lector.fullname" . }}-oauth2-proxy
+          ports:
+            - name: oauth2-proxy
+              containerPort: 4180
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+        {{- end }}
+
+      volumes:
+        - name: data-volume
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "lector.fullname" . }}-data
+        {{- else }}
+          emptyDir: {}
+        {{- end }}

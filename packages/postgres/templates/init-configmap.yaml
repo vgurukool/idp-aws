@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "postgres.fullname" . }}-init-scripts
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
+data:
+  01-init-multiple-dbs.sh: |
+    #!/bin/bash
+    set -e
+    set -u
+
+    function create_user_and_database() {
+        local database=$1
+        local user=$2
+        local password=$3
+        echo "Creating user '$user' and database '$database'..."
+        psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+            DO \$\$
+            BEGIN
+                IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '$user') THEN
+                    CREATE ROLE $user WITH LOGIN ENCRYPTED PASSWORD '$password';
+                END IF;
+            END
+            \$\$;
+            SELECT 'CREATE DATABASE $database OWNER $user'
+            WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '$database')\gexec
+            GRANT ALL PRIVILEGES ON DATABASE $database TO $user;
+            \c $database
+            GRANT ALL ON SCHEMA public TO $user;
+    EOSQL
+    }
+
+    echo "Running Unified PostgreSQL multi-database provisioner for Vgurukool..."
+
+    create_user_and_database "keycloak_db" "keycloak_user" "${KEYCLOAK_DB_PASSWORD:-Keycloak2026SecurePass}"
+    create_user_and_database "learnhouse_db" "learnhouse_user" "${LEARNHOUSE_DB_PASSWORD:-LearnHouse2026SecurePass}"
+    create_user_and_database "litellm_db" "litellm_user" "${LITELLM_DB_PASSWORD:-LiteLLM2026SecurePass}"
+    create_user_and_database "backstage_db" "backstage_user" "${BACKSTAGE_DB_PASSWORD:-Backstage2026SecurePass}"
+    create_user_and_database "freelingo_db" "freelingo_user" "${FREELINGO_DB_PASSWORD:-FreeLingo2026SecurePass}"
+    create_user_and_database "game_db" "game_user" "${GAME_DB_PASSWORD:-Game2026SecurePass}"
+    create_user_and_database "ashta_db" "ashta_user" "${ASHTA_DB_PASSWORD:-Ashta2026SecurePass}"
+    create_user_and_database "openfga_db" "openfga_user" "${OPENFGA_DB_PASSWORD:-OpenFGA2026SecurePass}"
+    create_user_and_database "openwearables_db" "openwearables_user" "${OPENWEARABLES_DB_PASSWORD:-OpenWearables2026SecurePass}"
+    create_user_and_database "maic_db" "maic_user" "${MAIC_DB_PASSWORD:-MAIC2026SecurePass}"
+
+    echo "Unified PostgreSQL multi-database provisioning completed successfully!"

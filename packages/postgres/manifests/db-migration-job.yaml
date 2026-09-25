@@ -1,0 +1,84 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: platform-db-migration-job
+  namespace: postgres
+  labels:
+    app.kubernetes.io/name: platform-db-migration
+    app.kubernetes.io/part-of: vgurukool-platform
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      name: platform-db-migration
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrator
+          image: postgres:16.2-alpine
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              echo "Starting In-Cluster Data Migration to Unified PostgreSQL..."
+
+              TARGET_HOST="postgres-cluster.postgres.svc.cluster.local"
+              TARGET_PORT="5432"
+
+              migrate() {
+                NAME=$1
+                SRC_HOST=$2
+                SRC_DB=$3
+                SRC_USER=$4
+                SRC_PASS=$5
+                TGT_DB=$6
+                TGT_USER=$7
+                TGT_PASS=$8
+
+                echo "=== Migrating ${NAME} ==="
+                echo "Source: ${SRC_USER}@${SRC_HOST}:5432/${SRC_DB}"
+                echo "Target: ${TGT_USER}@${TARGET_HOST}:5432/${TGT_DB}"
+
+                # Test source reachability
+                if ! pg_isready -h "${SRC_HOST}" -p 5432 -t 5; then
+                  echo "WARNING: Source ${SRC_HOST} is not reachable. Skipping ${NAME}."
+                  return 0
+                fi
+
+                PGPASSWORD="${SRC_PASS}" pg_dump -h "${SRC_HOST}" -p 5432 -U "${SRC_USER}" -d "${SRC_DB}" \
+                  --no-owner --no-acl --clean --if-exists | \
+                  PGPASSWORD="${TGT_PASS}" psql -h "${TARGET_HOST}" -p 5432 -U "${TGT_USER}" -d "${TGT_DB}" -v ON_ERROR_STOP=1
+
+                echo "Verifying ${NAME} table count..."
+                COUNT=$(PGPASSWORD="${TGT_PASS}" psql -h "${TARGET_HOST}" -p 5432 -U "${TGT_USER}" -d "${TGT_DB}" -t -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';")
+                echo "SUCCESS: ${NAME} migrated! Public table count: ${COUNT}"
+              }
+
+              # 1. Keycloak IAM (Highest priority - preserves all users, realms, password hashes)
+              migrate "Keycloak IAM" \
+                "keycloak-postgresql.keycloak.svc.cluster.local" "keycloak" "keycloak" "Keycloak2026SecurePass" \
+                "keycloak_db" "keycloak_user" "Keycloak2026SecurePass"
+
+              # 2. LearnHouse LMS
+              migrate "LearnHouse LMS" \
+                "learnhouse-db.learnhouse.svc.cluster.local" "learnhouse" "learnhouse" "LearnHouse2026SecurePass" \
+                "learnhouse_db" "learnhouse_user" "LearnHouse2026SecurePass"
+
+              # 3. LiteLLM Proxy
+              migrate "LiteLLM Gateway" \
+                "litellm-db.litellm.svc.cluster.local" "litellm" "litellm" "LiteLLM2026SecurePass" \
+                "litellm_db" "litellm_user" "LiteLLM2026SecurePass"
+
+              # 4. Open Wearables
+              migrate "Open Wearables" \
+                "open-wearables-db.default.svc.cluster.local" "openwearables" "openwearables" "ow_secure_db_pass_2026" \
+                "openwearables_db" "openwearables_user" "OpenWearables2026SecurePass"
+
+              echo "All in-cluster data migrations finished cleanly!"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

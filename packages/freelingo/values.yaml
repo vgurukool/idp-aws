@@ -1,0 +1,61 @@
+# Bhasha Vidya (FreeLingo) Helm Values
+replicaCount: 1
+
+image:
+  repository: ghcr.io/artcc/freelingo
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+    nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
+  hosts:
+    - host: bhasha.vgurukool.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: bhasha-vgurukool-tls
+      hosts:
+        - bhasha.vgurukool.com
+
+env:
+  NODE_ENV: "production"
+  NEXTAUTH_URL: "https://bhasha.vgurukool.com"
+  PORT: "3000"
+
+database:
+  host: "postgres-cluster.postgres.svc.cluster.local"
+  port: 5432
+  name: "freelingo_db"
+  user: "freelingo_user"
+  password: "FreeLingo2026SecurePass"
+
+keycloak:
+  issuer: "https://platform.vgurukool.com/keycloak/realms/cnoe"
+  clientId: "freelingo"
+  clientSecret: "freelingo-keycloak-sso-secret-2026"
+  nextauthSecret: "bhasha-freelingo-nextauth-secret-key-32chars"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

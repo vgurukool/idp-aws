@@ -1,0 +1,9 @@
+apiVersion: v2
+name: lector
+description: Granth Svadhyaya (Lector) - Sovereign Scripture Reader & E-Reader with Continuous Keycloak SSO
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+maintainers:
+  - name: Vgurukool DevOps Team
+    email: devops@vgurukool.com

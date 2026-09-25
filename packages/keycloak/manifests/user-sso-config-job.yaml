@@ -247,6 +247,126 @@ data:
         "https://granth.vgurukool.com"
       ]
     }
+  freelingo-client-payload.json: |
+    {
+      "protocol": "openid-connect",
+      "clientId": "freelingo",
+      "name": "Bhasha Vidya FreeLingo Client",
+      "description": "Used for Bhasha Vidya FreeLingo Language Learning SSO",
+      "publicClient": false,
+      "secret": "freelingo-keycloak-sso-secret-2026",
+      "authorizationServicesEnabled": false,
+      "serviceAccountsEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "frontchannelLogout": true,
+      "attributes": {
+        "saml_idp_initiated_sso_url_name": "",
+        "oauth2.device.authorization.grant.enabled": false,
+        "oidc.ciba.grant.enabled": false
+      },
+      "alwaysDisplayInConsole": false,
+      "rootUrl": "https://bhasha.vgurukool.com",
+      "baseUrl": "/",
+      "redirectUris": [
+        "https://bhasha.vgurukool.com/*",
+        "https://bhasha.vgurukool.com/api/auth/callback/keycloak",
+        "https://bhasha.vgurukool.com/login"
+      ],
+      "webOrigins": [
+        "https://bhasha.vgurukool.com"
+      ]
+    }
+  lector-client-payload.json: |
+    {
+      "protocol": "openid-connect",
+      "clientId": "lector",
+      "name": "Granth Svadhyaya Scripture Reader Client",
+      "description": "Used for Granth Svadhyaya Scripture Reader SSO via oauth2-proxy",
+      "publicClient": false,
+      "secret": "svadhyaya-keycloak-sso-secret-2026",
+      "authorizationServicesEnabled": false,
+      "serviceAccountsEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "frontchannelLogout": true,
+      "attributes": {
+        "saml_idp_initiated_sso_url_name": "",
+        "oauth2.device.authorization.grant.enabled": false,
+        "oidc.ciba.grant.enabled": false
+      },
+      "alwaysDisplayInConsole": false,
+      "rootUrl": "https://svadhyaya.vgurukool.com",
+      "baseUrl": "/",
+      "redirectUris": [
+        "https://svadhyaya.vgurukool.com/oauth2/callback"
+      ],
+      "webOrigins": [
+        "https://svadhyaya.vgurukool.com"
+      ]
+    }
+  deeptutor-client-payload.json: |
+    {
+      "protocol": "openid-connect",
+      "clientId": "deeptutor",
+      "name": "Socratic AI Acharya DeepTutor Client",
+      "description": "Used for Socratic AI Acharya DeepTutor SSO via oauth2-proxy",
+      "publicClient": false,
+      "secret": "acharya-keycloak-sso-secret-2026",
+      "authorizationServicesEnabled": false,
+      "serviceAccountsEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "frontchannelLogout": true,
+      "attributes": {
+        "saml_idp_initiated_sso_url_name": "",
+        "oauth2.device.authorization.grant.enabled": false,
+        "oidc.ciba.grant.enabled": false
+      },
+      "alwaysDisplayInConsole": false,
+      "rootUrl": "https://acharya.vgurukool.com",
+      "baseUrl": "/",
+      "redirectUris": [
+        "https://acharya.vgurukool.com/oauth2/callback"
+      ],
+      "webOrigins": [
+        "https://acharya.vgurukool.com"
+      ]
+    }
+  game-client-payload.json: |
+    {
+      "protocol": "openid-connect",
+      "clientId": "game",
+      "name": "Karma Vijaya GAME Client",
+      "description": "Used for Goals And Motivation Engine GAME SSO",
+      "publicClient": false,
+      "secret": "karma-keycloak-sso-secret-2026",
+      "authorizationServicesEnabled": false,
+      "serviceAccountsEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "frontchannelLogout": true,
+      "attributes": {
+        "saml_idp_initiated_sso_url_name": "",
+        "oauth2.device.authorization.grant.enabled": false,
+        "oidc.ciba.grant.enabled": false
+      },
+      "alwaysDisplayInConsole": false,
+      "rootUrl": "https://karma.vgurukool.com",
+      "baseUrl": "/",
+      "redirectUris": [
+        "https://karma.vgurukool.com/*",
+        "https://karma.vgurukool.com/auth/callback",
+        "https://karma.vgurukool.com/api/auth/callback"
+      ],
+      "webOrigins": [
+        "https://karma.vgurukool.com"
+      ]
+    }
 ---
 apiVersion: batch/v1
 kind: Job
@@ -442,6 +562,18 @@ spec:
 
               create_client "Calibre-Web" "/var/config/calibre-web-client-payload.json"
               add_client_scope "calibre-web" "Calibre-Web"
+
+              create_client "FreeLingo" "/var/config/freelingo-client-payload.json"
+              add_client_scope "freelingo" "FreeLingo"
+
+              create_client "Lector" "/var/config/lector-client-payload.json"
+              add_client_scope "lector" "Lector"
+
+              create_client "DeepTutor" "/var/config/deeptutor-client-payload.json"
+              add_client_scope "deeptutor" "DeepTutor"
+
+              create_client "GAME" "/var/config/game-client-payload.json"
+              add_client_scope "game" "GAME"
 
               echo "Creating ArgoCD session token for backstage"
               ARGOCD_PASSWORD=$(./kubectl -n argocd get secret argocd-initial-admin-secret -o go-template='{{.data.password | base64decode }}')

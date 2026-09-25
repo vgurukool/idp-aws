@@ -1,0 +1,78 @@
+# Socratic AI Acharya (DeepTutor) Helm Values
+replicaCount: 1
+
+image:
+  repository: hkuds/deeptutor
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8501
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+    nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
+    # Keycloak SSO Authentication via oauth2-proxy
+    nginx.ingress.kubernetes.io/auth-url: "https://acharya.vgurukool.com/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://acharya.vgurukool.com/oauth2/start?rd=$escaped_request_uri"
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Request-User,X-Auth-Request-Email,X-Auth-Request-Preferred-Username"
+  hosts:
+    - host: acharya.vgurukool.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: acharya-vgurukool-tls
+      hosts:
+        - acharya.vgurukool.com
+
+# LLM Gateway connection (LiteLLM Proxy internal cluster DNS)
+llm:
+  apiBase: "http://litellm-proxy.litellm.svc.cluster.local:4000/v1"
+  apiKey: "sk-litellm-master-key"
+  model: "bedrock/anthropic.claude-3-sonnet-20240229-v1:0"
+
+# OAuth2-Proxy Sidecar Configuration for Keycloak SSO
+sso:
+  enabled: true
+  image:
+    repository: quay.io/oauth2-proxy/oauth2-proxy
+    tag: "v7.6.0"
+    pullPolicy: IfNotPresent
+  port: 4180
+  keycloak:
+    issuerUrl: "https://platform.vgurukool.com/keycloak/realms/cnoe"
+    clientId: "deeptutor"
+    clientSecret: "acharya-keycloak-sso-secret-2026"
+  cookie:
+    secret: "acharya-deeptutor-cookie-secret-key-32c"
+    domain: "acharya.vgurukool.com"
+
+persistence:
+  enabled: true
+  storageClass: "gp3"
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1536Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
