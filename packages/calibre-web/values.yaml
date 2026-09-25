@@ -36,6 +36,13 @@ ingress:
       hosts:
         - granth.vgurukool.com
 
+# External Secrets Configuration (Zero plaintext secrets in git)
+externalSecrets:
+  enabled: true
+  clusterSecretStore: aws-secretsmanager
+  remoteSecrets:
+    clientSecretKey: "" # Leave empty to use ESO generator or specify AWS SM key
+
 # OAuth2-Proxy Sidecar Configuration for Keycloak SSO
 sso:
   enabled: true
@@ -47,9 +54,9 @@ sso:
   keycloak:
     issuerUrl: "https://platform.vgurukool.com/keycloak/realms/cnoe"
     clientId: "calibre-web"
-    clientSecret: "granth-keycloak-sso-secret-2026"
+    clientSecret: "" # Managed securely via ExternalSecret / AWS Secrets Manager
   cookie:
-    secret: "e8253e754b99c5a50a768cb20d7ebc73" # 32-byte secret for AES-256 cipher
+    secret: "" # Generated dynamically via ESO Password generator
     domain: ".vgurukool.com"
 
 persistence:

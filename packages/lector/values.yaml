@@ -47,10 +47,12 @@ sso:
   keycloak:
     issuerUrl: "https://platform.vgurukool.com/keycloak/realms/cnoe"
     clientId: "lector"
-    clientSecret: "svadhyaya-keycloak-sso-secret-2026"
   cookie:
-    secret: "svadhyaya-lector-cookie-secret-key-32ch"
     domain: "svadhyaya.vgurukool.com"
+
+externalSecrets:
+  enabled: true
+
 
 persistence:
   enabled: true

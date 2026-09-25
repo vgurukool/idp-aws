@@ -40,13 +40,14 @@ database:
   port: 5432
   name: "freelingo_db"
   user: "freelingo_user"
-  password: "FreeLingo2026SecurePass"
 
 keycloak:
   issuer: "https://platform.vgurukool.com/keycloak/realms/cnoe"
   clientId: "freelingo"
-  clientSecret: "freelingo-keycloak-sso-secret-2026"
-  nextauthSecret: "bhasha-freelingo-nextauth-secret-key-32chars"
+
+externalSecrets:
+  enabled: true
+
 
 resources:
   requests:

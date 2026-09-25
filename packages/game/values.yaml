@@ -40,13 +40,14 @@ database:
   port: 5432
   name: "game_db"
   user: "game_user"
-  password: "Game2026SecurePass"
 
 keycloak:
   issuer: "https://platform.vgurukool.com/keycloak/realms/cnoe"
   clientId: "game"
-  clientSecret: "karma-keycloak-sso-secret-2026"
-  jwtSecret: "karma-game-jwt-secret-token-key-32ch"
+
+externalSecrets:
+  enabled: true
+
 
 resources:
   requests:

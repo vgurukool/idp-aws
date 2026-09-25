@@ -12,19 +12,13 @@ service:
   name: postgres-cluster
 
 auth:
-  postgresPassword: "MasterPostgres2026AdminPass"
   database: "postgres"
-  databasePasswords:
-    keycloak: "Keycloak2026SecurePass"
-    learnhouse: "LearnHouse2026SecurePass"
-    litellm: "LiteLLM2026SecurePass"
-    backstage: "Backstage2026SecurePass"
-    freelingo: "FreeLingo2026SecurePass"
-    game: "Game2026SecurePass"
-    ashta: "Ashta2026SecurePass"
-    openfga: "OpenFGA2026SecurePass"
-    openwearables: "OpenWearables2026SecurePass"
-    maic: "MAIC2026SecurePass"
+  # Secure credentials management:
+  # When useExternalSecrets is true, all tenant database passwords and admin password
+  # are dynamically generated via External Secrets Operator (ESO) inside the cluster.
+  # Zero credentials reside in Git repository.
+  useExternalSecrets: true
+  existingSecret: ""
 
 persistence:
   enabled: true

@@ -39,7 +39,6 @@ ingress:
 # LLM Gateway connection (LiteLLM Proxy internal cluster DNS)
 llm:
   apiBase: "http://litellm-proxy.litellm.svc.cluster.local:4000/v1"
-  apiKey: "sk-litellm-master-key"
   model: "bedrock/anthropic.claude-3-sonnet-20240229-v1:0"
 
 # OAuth2-Proxy Sidecar Configuration for Keycloak SSO
@@ -53,10 +52,12 @@ sso:
   keycloak:
     issuerUrl: "https://platform.vgurukool.com/keycloak/realms/cnoe"
     clientId: "deeptutor"
-    clientSecret: "acharya-keycloak-sso-secret-2026"
   cookie:
-    secret: "acharya-deeptutor-cookie-secret-key-32c"
     domain: "acharya.vgurukool.com"
+
+externalSecrets:
+  enabled: true
+
 
 persistence:
   enabled: true

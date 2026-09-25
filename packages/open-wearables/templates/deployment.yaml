@@ -1,3 +1,4 @@
+{{- $ext := .Values.externalDatabase | default dict -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -37,18 +38,18 @@ spec:
             - name: API_BASE_URL
               value: {{ .Values.env.API_BASE_URL | default "https://wearables.vgurukool.com" | quote }}
             - name: DB_HOST
-              value: "{{ include "open-wearables.fullname" . }}-db"
+              value: {{ if $ext.host }}{{ $ext.host | quote }}{{ else }}"{{ include "open-wearables.fullname" . }}-db"{{ end }}
             - name: DB_PORT
-              value: "5432"
+              value: {{ if $ext.port }}{{ $ext.port | quote }}{{ else }}"5432"{{ end }}
             - name: DB_NAME
-              value: {{ .Values.postgresql.auth.database | quote }}
+              value: {{ if $ext.database }}{{ $ext.database | quote }}{{ else }}{{ .Values.postgresql.auth.database | quote }}{{ end }}
             - name: DB_USER
-              value: {{ .Values.postgresql.auth.username | quote }}
+              value: {{ if $ext.username }}{{ $ext.username | quote }}{{ else }}{{ .Values.postgresql.auth.username | quote }}{{ end }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "open-wearables.fullname" . }}-secret
-                  key: DB_PASSWORD
+                  name: {{ if $ext.existingSecret }}{{ $ext.existingSecret }}{{ else }}{{ include "open-wearables.fullname" . }}-secret{{ end }}
+                  key: {{ if $ext.secretKey }}{{ $ext.secretKey }}{{ else }}DB_PASSWORD{{ end }}
             - name: REDIS_HOST
               value: "{{ include "open-wearables.fullname" . }}-redis"
             - name: REDIS_PORT

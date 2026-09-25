@@ -36,7 +36,13 @@ ingress:
       hosts:
         - wearables.vgurukool.com
 
-# OAuth2-Proxy Sidecar Configuration for Keycloak SSO
+# External Secrets Configuration (Zero plaintext secrets in git)
+externalSecrets:
+  enabled: true
+  clusterSecretStore: aws-secretsmanager
+  remoteSecrets:
+    clientSecretKey: "" # Leave empty to use ESO generator or specify AWS SM key
+
 sso:
   enabled: true
   image:
@@ -47,9 +53,9 @@ sso:
   keycloak:
     issuerUrl: "https://platform.vgurukool.com/keycloak/realms/cnoe"
     clientId: "open-wearables"
-    clientSecret: "open-wearables-sso-secret-2026"
+    clientSecret: "" # Managed securely via ExternalSecret / AWS Secrets Manager
   cookie:
-    secret: "3f829a1b0c4e7d5f6a8b2c1d9e0f3a4b" # 32-byte secret for AES-256 cipher
+    secret: "" # Generated dynamically via ESO Password generator
     domain: ".vgurukool.com"
 
 # PostgreSQL Database Configuration
@@ -62,7 +68,7 @@ postgresql:
   auth:
     database: openwearables
     username: openwearables
-    password: "ow_secure_db_pass_2026"
+    password: "" # Managed securely via ExternalSecret / AWS Secrets Manager
   persistence:
     enabled: true
     storageClass: "gp3"
