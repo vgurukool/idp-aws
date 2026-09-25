@@ -2,7 +2,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/artcc/freelingo
+  repository: ayusing/freelingo
   tag: "latest"
   pullPolicy: IfNotPresent
 
