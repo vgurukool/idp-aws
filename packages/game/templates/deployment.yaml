@@ -6,6 +6,8 @@ metadata:
     {{- include "game.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "game.selectorLabels" . | nindent 6 }}
@@ -37,6 +39,10 @@ spec:
               value: {{ .Values.database.name | quote }}
             - name: DB_USER
               value: {{ .Values.database.user | quote }}
+            - name: ACCESS_LOG
+              value: "-"
+            - name: ERROR_LOG
+              value: "-"
           envFrom:
             - secretRef:
                 name: {{ include "game.fullname" . }}
