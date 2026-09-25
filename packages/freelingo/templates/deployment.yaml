@@ -29,6 +29,8 @@ spec:
               value: {{ .Values.env.NEXTAUTH_URL | quote }}
             - name: PORT
               value: {{ .Values.env.PORT | quote }}
+            - name: BACKEND_URL
+              value: "http://127.0.0.1:8000"
           envFrom:
             - secretRef:
                 name: {{ include "freelingo.fullname" . }}
@@ -50,6 +52,65 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
+
+        {{- if .Values.redis.enabled }}
+        # Redis Container for FreeLingo Token Storage & Rate Limiting
+        - name: redis
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy }}
+          ports:
+            - name: redis
+              containerPort: {{ .Values.redis.port | default 6379 }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.redis.resources | nindent 12 }}
+        {{- end }}
+
+        {{- if .Values.backend.enabled }}
+        # FreeLingo FastAPI Backend Container
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - "cd /tmp && PYTHONPATH=/app alembic -c /app/alembic.ini upgrade head && cd /app && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "freelingo.fullname" . }}
+                  key: DATABASE_URL_ASYNC
+            - name: REDIS_URL
+              value: "redis://127.0.0.1:6379/0"
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "freelingo.fullname" . }}
+                  key: SECRET_KEY
+            - name: ALLOW_REGISTRATION
+              value: "true"
+            - name: FIRST_USER_IS_ADMIN
+              value: "true"
+            - name: CORS_ORIGINS
+              value: '["https://bhasha.vgurukool.com", "http://localhost:3000"]'
+            - name: APP_BASE_URL
+              value: "https://bhasha.vgurukool.com"
+          ports:
+            - name: backend
+              containerPort: {{ .Values.backend.port | default 8000 }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /api/config
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+        {{- end }}
 
         {{- if .Values.sso.enabled }}
         # OAuth2-Proxy Sidecar Container for Keycloak SSO

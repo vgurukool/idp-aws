@@ -4,7 +4,37 @@ replicaCount: 1
 image:
   repository: ayusing/freelingo
   tag: "latest"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
+
+backend:
+  enabled: true
+  image:
+    repository: ghcr.io/artcc/freelingo-backend
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  port: 8000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: "7-alpine"
+    pullPolicy: IfNotPresent
+  port: 6379
+  resources:
+    requests:
+      cpu: 20m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
 
 service:
   type: ClusterIP
