@@ -60,26 +60,15 @@ sso:
 
 # PostgreSQL Database Configuration
 postgresql:
-  enabled: true
-  image:
-    repository: bitnamilegacy/postgresql
-    tag: "17.4.0-debian-12-r17"
-    pullPolicy: IfNotPresent
-  auth:
-    database: openwearables
-    username: openwearables
-    password: "" # Managed securely via ExternalSecret / AWS Secrets Manager
-  persistence:
-    enabled: true
-    storageClass: "gp3"
-    size: 5Gi
-  resources:
-    limits:
-      cpu: 250m
-      memory: 256Mi
-    requests:
-      cpu: 50m
-      memory: 128Mi
+  enabled: false
+
+externalDatabase:
+  host: "postgres-postgresql.postgres.svc.cluster.local"
+  port: 5432
+  database: "openwearables"
+  username: "openwearables"
+  existingSecret: "open-wearables-secret"
+  secretKey: "DB_PASSWORD"
 
 # Redis Cache & Broker Configuration
 redis:
