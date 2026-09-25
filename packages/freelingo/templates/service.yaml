@@ -9,7 +9,13 @@ spec:
   ports:
     - name: http
       port: {{ .Values.service.port }}
-      targetPort: 3000
+      targetPort: {{ .Values.service.port }}
       protocol: TCP
+    {{- if .Values.sso.enabled }}
+    - name: oauth2-proxy
+      port: {{ .Values.sso.port | default 4180 }}
+      targetPort: 4180
+      protocol: TCP
+    {{- end }}
   selector:
     {{- include "freelingo.selectorLabels" . | nindent 4 }}
