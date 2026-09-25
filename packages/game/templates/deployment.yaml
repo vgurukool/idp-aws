@@ -29,6 +29,14 @@ spec:
               value: {{ .Values.env.PORT | quote }}
             - name: APP_URL
               value: {{ .Values.env.APP_URL | quote }}
+            - name: DB_HOST
+              value: {{ .Values.database.host | quote }}
+            - name: DB_PORT
+              value: {{ .Values.database.port | quote }}
+            - name: DB_NAME
+              value: {{ .Values.database.name | quote }}
+            - name: DB_USER
+              value: {{ .Values.database.user | quote }}
           envFrom:
             - secretRef:
                 name: {{ include "game.fullname" . }}
