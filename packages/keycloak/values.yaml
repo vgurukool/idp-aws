@@ -50,14 +50,13 @@ ingress:
   tls: false
 
 postgresql:
-  enabled: true
-  image:
-    registry: docker.io
-    repository: bitnamilegacy/postgresql
-  auth:
-    username: keycloak
-    database: keycloak
-    existingSecret: "keycloak-config"
-    secretKeys:
-      userPasswordKey: POSTGRES_PASSWORD
-  architecture: standalone
+  enabled: false
+
+externalDatabase:
+  host: "postgres-cluster.postgres.svc.cluster.local"
+  port: 5432
+  user: "keycloak_user"
+  database: "keycloak_db"
+  password: "Keycloak2026SecurePass"
+  existingSecret: "keycloak-config"
+  existingSecretPasswordKey: "KEYCLOAK_DB_PASSWORD"
